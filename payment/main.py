@@ -1,4 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException
+from config import settings
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import HashModel, NotFoundError
 import httpx  # Modernija zamena za requests
@@ -36,7 +37,7 @@ async def get_order(pk: str):
 async def create_order(body: dict, background_tasks: BackgroundTasks):
     # Asinhroni poziv ka Inventory servisu
     async with httpx.AsyncClient() as client:
-        response = await client.get(f'http://localhost:8000/products/{body["id"]}')
+        response = await client.get(f"{settings.inventory_url}/products/{body['id']}")
         if response.status_code != 200:
             raise HTTPException(status_code=400, detail="Product not found in Inventory")
         product = response.json()
