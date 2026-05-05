@@ -1,0 +1,50 @@
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  inventory:
+    build: ./inventory
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    env_file:
+      - ./inventory/.env
+
+  inventory-consumer:
+    build: ./inventory
+    command: python consumer.py
+    depends_on:
+      - redis
+      - inventory
+    env_file:
+      - ./inventory/.env
+
+  payment:
+    build: ./payment
+    ports:
+      - "8001:8000"
+    depends_on:
+      - redis
+      - inventory
+    env_file:
+      - ./payment/.env
+
+  payment-consumer:
+    build: ./payment
+    command: python consumer.py
+    depends_on:
+      - redis
+      - payment
+    env_file:
+      - ./payment/.env
+
+  notification:
+    build: ./notification
+    command: python consumer.py
+    depends_on:
+      - redis
+    env_file:
+      - ./notification/.env
